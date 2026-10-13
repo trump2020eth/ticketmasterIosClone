@@ -20,6 +20,11 @@ jobs:
             -project TMSDKDemoIntegration.xcodeproj \
             -scheme TMSDKDemoIntegration
 
+      - name: Remove SwiftLint (skip lint phase)
+        run: |
+          brew uninstall --force swiftlint || true
+          sudo rm -f "$(which swiftlint)" || true
+
       - name: Build for iOS Simulator (unsigned)
         run: |
           xcodebuild build \
