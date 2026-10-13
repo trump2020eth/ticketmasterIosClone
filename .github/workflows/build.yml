@@ -10,6 +10,8 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: 23d9c9a5c5588e61b48928b430f968b2a4bf16b8
 
       - name: Show Xcode version
         run: xcodebuild -version
