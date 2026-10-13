@@ -20,13 +20,9 @@ jobs:
             -project TMSDKDemoIntegration.xcodeproj \
             -scheme TMSDKDemoIntegration
 
-      - name: Remove SwiftLint (skip lint phase)
-        run: |
-          brew uninstall --force swiftlint || true
-          sudo rm -f "$(which swiftlint)" || true
-
       - name: Build for iOS Simulator (unsigned)
         run: |
+          set -o pipefail
           xcodebuild build \
             -project TMSDKDemoIntegration.xcodeproj \
             -scheme TMSDKDemoIntegration \
@@ -35,7 +31,14 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO
+            CODE_SIGNING_REQUIRED=NO \
+            2>&1 | tee build.log
+
+      - name: Show errors only
+        if: failure()
+        run: |
+          echo "=== ERRORS ==="
+          grep -E "error:" build.log | sed 's#/Users/runner/work/[^/]*/[^/]*/##' | sort -u | head -40
 
       - name: Zip the .app for Appetize
         run: |
