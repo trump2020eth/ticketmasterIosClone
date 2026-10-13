@@ -1,0 +1,43 @@
+name: Build iOS Simulator App
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Resolve Swift packages
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project TMSDKDemoIntegration.xcodeproj \
+            -scheme TMSDKDemoIntegration
+
+      - name: Build for iOS Simulator (unsigned)
+        run: |
+          xcodebuild build \
+            -project TMSDKDemoIntegration.xcodeproj \
+            -scheme TMSDKDemoIntegration \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      - name: Zip the .app for Appetize
+        run: |
+          cd build/Build/Products/Debug-iphonesimulator
+          zip -r "$GITHUB_WORKSPACE/TMSDKDemo-simulator.zip" *.app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TMSDKDemo-simulator
+          path: TMSDKDemo-simulator.zip
